@@ -23,6 +23,13 @@ if __name__ == "__main__":
     # Create dataframe with winners
     winners = pd.DataFrame(data["awards"], index=[0])
 
+    # Create a category dataframe
+    categories = winners.melt(var_name="Award", value_name="Winner")
+    categories["CorrectCount"] = categories.apply(
+        lambda row: (guesses[row["Award"]] == row["Winner"]).sum(), axis=1
+    )
+    categories["PercentageCorrect"] = categories["CorrectCount"] / len(guesses)
+
     # Get the amount that each Nombre guessed correctly
     guesses["Correct"] = guesses[winners.columns].eq(winners.iloc[0]).sum(axis=1)
 
@@ -30,7 +37,7 @@ if __name__ == "__main__":
     premade = markdownFunctions.loadMarkdownParts()
     mainMarkdown = [premade["beginning"]]
 
-    # Sort and save the Correct for each participant
+    # Sort and show the Correct for each participant
     guesses = guesses.sort_values(by="Correct", ascending=False)
     mainMarkdown.append(premade["guesses"])
     mainMarkdown.append(
@@ -44,6 +51,22 @@ if __name__ == "__main__":
         )
     )
 
+    # Sort and show the PercentageCorrect for each category
+    categories = categories.sort_values(
+        by=["PercentageCorrect", "Award"], ascending=True
+    )
+    mainMarkdown.append(premade["questionDifficulty"])
+    mainMarkdown.append(
+        markdownFunctions.markdownTable(
+            {
+                "Category": categories["Award"].tolist(),
+                "Percentage Correct": [
+                    f"{x:.2%}" for x in categories["PercentageCorrect"].tolist()
+                ],
+            }
+        )
+    )
+
     # Save the Markdown to a file
     with open("README.md", "w") as f:
-        f.write("\n".join(mainMarkdown) + "\n")
+        f.write("\n".join(mainMarkdown))
