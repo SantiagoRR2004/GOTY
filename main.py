@@ -57,16 +57,18 @@ if __name__ == "__main__":
     )
 
     # Sort and show the PercentageCorrect for each category
-    categories = categories.sort_values(
-        by=["PercentageCorrect", "Award"], ascending=True
-    )
+    grouped = categories.groupby("PercentageCorrect")["Award"].apply(list).reset_index()
+    grouped = grouped.sort_values(by="PercentageCorrect", ascending=True)
     mainMarkdown.append(premade["questionDifficulty"])
     mainMarkdown.append(
         markdownFunctions.markdownTable(
             {
-                "Category": categories["Award"].tolist(),
+                "Category": [
+                    " ".join([f"`{x}`" for x in cats])
+                    for cats in grouped["Award"].tolist()
+                ],
                 "Percentage Correct": [
-                    f"{x:.2%}" for x in categories["PercentageCorrect"].tolist()
+                    f"{x:.2%}" for x in grouped["PercentageCorrect"].tolist()
                 ],
             }
         )
