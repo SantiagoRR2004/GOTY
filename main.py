@@ -1,3 +1,4 @@
+from scipy.stats import entropy
 import markdownFunctions
 import pandas as pd
 import json
@@ -29,6 +30,10 @@ if __name__ == "__main__":
         lambda row: (guesses[row["Award"]] == row["Winner"]).sum(), axis=1
     )
     categories["PercentageCorrect"] = categories["CorrectCount"] / len(guesses)
+    categories["Entropy"] = categories.apply(
+        lambda row: entropy(guesses[row["Award"]].value_counts(normalize=True)),
+        axis=1,
+    )
 
     # Get the amount that each Nombre guessed correctly
     guesses["Correct"] = guesses[winners.columns].eq(winners.iloc[0]).sum(axis=1)
@@ -63,6 +68,18 @@ if __name__ == "__main__":
                 "Percentage Correct": [
                     f"{x:.2%}" for x in categories["PercentageCorrect"].tolist()
                 ],
+            }
+        )
+    )
+
+    # Sort and show the Entropy for each category
+    categories = categories.sort_values(by=["Entropy", "Award"], ascending=False)
+    mainMarkdown.append(premade["controversial"])
+    mainMarkdown.append(
+        markdownFunctions.markdownTable(
+            {
+                "Category": categories["Award"].tolist(),
+                "Entropy": [f"{x:.4f}" for x in categories["Entropy"].tolist()],
             }
         )
     )
