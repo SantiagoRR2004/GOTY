@@ -30,11 +30,8 @@ if __name__ == "__main__":
     premade = markdownFunctions.loadMarkdownParts()
     mainMarkdown = [premade["beginning"]]
 
-    # Sort and show the Correct for each participant
+    # Sort and save the Correct for each participant
     guesses = guesses.sort_values(by="Correct", ascending=False)
-    for index, row in guesses.iterrows():
-        print(f"{row['Nombre']}: {row['Correct']}")
-
     mainMarkdown.append(premade["guesses"])
     mainMarkdown.append(
         markdownFunctions.markdownTable(
