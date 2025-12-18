@@ -21,6 +21,9 @@ if __name__ == "__main__":
     # Change the columns that have newline
     guesses.columns = [col.split("\n")[0] for col in guesses.columns]
 
+    # Change Marca temporal to datetime
+    guesses["Marca temporal"] = pd.to_datetime(guesses["Marca temporal"], dayfirst=True)
+
     # Create dataframe with winners
     winners = pd.DataFrame(data["awards"], index=[0])
 
@@ -43,7 +46,9 @@ if __name__ == "__main__":
     mainMarkdown = [premade["beginning"]]
 
     # Sort and show the Correct for each participant
-    guesses = guesses.sort_values(by="Correct", ascending=False)
+    guesses = guesses.sort_values(
+        by=["Correct", "Marca temporal", "Nombre"], ascending=False
+    )
     mainMarkdown.append(premade["guesses"])
     mainMarkdown.append(
         markdownFunctions.markdownTable(
