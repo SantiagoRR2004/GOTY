@@ -1,3 +1,4 @@
+import markdownFunctions
 import pandas as pd
 import json
 import os
@@ -25,7 +26,27 @@ if __name__ == "__main__":
     # Get the amount that each Nombre guessed correctly
     guesses["Correct"] = guesses[winners.columns].eq(winners.iloc[0]).sum(axis=1)
 
+    # Load the different premade Markdown parts
+    premade = markdownFunctions.loadMarkdownParts()
+    mainMarkdown = [premade["beginning"]]
+
     # Sort and show the Correct for each participant
     guesses = guesses.sort_values(by="Correct", ascending=False)
     for index, row in guesses.iterrows():
         print(f"{row['Nombre']}: {row['Correct']}")
+
+    mainMarkdown.append(premade["guesses"])
+    mainMarkdown.append(
+        markdownFunctions.markdownTable(
+            {
+                "Participant": guesses["Nombre"].tolist(),
+                "Correct Guesses": [
+                    f"{x} / {len(winners.columns)}" for x in guesses["Correct"].tolist()
+                ],
+            }
+        )
+    )
+
+    # Save the Markdown to a file
+    with open("README.md", "w") as f:
+        f.write("\n".join(mainMarkdown) + "\n")
