@@ -41,6 +41,18 @@ if __name__ == "__main__":
     # Get the amount that each Nombre guessed correctly
     guesses["Correct"] = guesses[winners.columns].eq(winners.iloc[0]).sum(axis=1)
 
+    # Get the ponderated score for each participant
+    categories["Ponderation"] = 1 - (categories["CorrectCount"] - 1).clip(
+        lower=0
+    ) / len(guesses)
+    guesses["CorrectPonderated"] = (
+        guesses[winners.columns]
+        .eq(winners.iloc[0])
+        .dot(categories.set_index("Award")["Ponderation"])
+        * 10
+        / categories["Ponderation"].sum()
+    )
+
     # Load the different premade Markdown parts
     premade = markdownFunctions.loadMarkdownParts()
     mainMarkdown = [premade["beginning"]]
@@ -56,6 +68,9 @@ if __name__ == "__main__":
                 "Participant": guesses["Nombre"].tolist(),
                 "Correct Guesses": [
                     f"{x} / {len(winners.columns)}" for x in guesses["Correct"].tolist()
+                ],
+                "Ponderated Score": [
+                    f"{x:.2f}" for x in guesses["CorrectPonderated"].tolist()
                 ],
             }
         )
