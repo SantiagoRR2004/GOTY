@@ -10,6 +10,9 @@ if __name__ == "__main__":
     GOTYDirectory = os.path.join(currentDirectory, "GOTY")
     docsFolder = os.path.join(currentDirectory, "docs")
 
+    os.makedirs(GOTYDirectory, exist_ok=True)
+    os.makedirs(docsFolder, exist_ok=True)
+
     mainREADME = "# Game of the Year\n\n## Different years\n\n"
 
     for file in os.listdir(GOTYDirectory):
